@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -36,7 +37,7 @@
       <option>/</option>
     </select>
     <input type="number" name="second-num" id="second-num" />
-    <button id="calculate">Calculate</button>
+    <button onclick="checkAnswer()" id="calculate">Calculate</button>
     <br />
     <output></output>
   </fieldset>
@@ -52,10 +53,42 @@
     <button>Start Timer</button>
     <button>End Timer</button>
     <button>Console Trace</button>
-    <button>Trigger a Global Error</button>
+    <button onclick="globalError()">Trigger a Global Error</button>
   </section>
 
   <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "ed051a1628704b738d6024cd8fc4e83c"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+
+  <script>
+    class BreakMathError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "BreakMathError";
+      }
+    }
+
+    TrackJS.track('Testing TrackJS!');
+
+    function checkAnswer(){
+      const val1 = document.getElementById('first-num').value;
+      const val2 = document.getElementById('second-num').value;
+      const op = document.getElementById('operator').value;
+      try {
+        if (val1 === '0' && val2 === '0' && op === '/') throw (new BreakMathError("can't divide by zero!"));
+      } catch (err) {
+        alert(err);
+      }
+    }
+
+
+    window.onerror = (message, source, lineno, colno, error) => {
+      console.log("GLOBAL ERROR:", message, source, lineno, colno, error);
+    };
+
     let calculateBtn = document.querySelector('#calculate');
     calculateBtn.addEventListener('click', () => {
       let output = document.querySelector('output');
@@ -66,7 +99,41 @@
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
-    // TODO - Make buttons functional
+    errorBtns[0].addEventListener('click', () => {
+      console.log("Logging!");
+    });
+    errorBtns[1].addEventListener('click', () => {
+      console.error("Erroring!");
+    });
+    errorBtns[2].addEventListener('click', () => {
+      console.dir(document.location);
+    });
+    errorBtns[3].addEventListener('click', () => {
+      console.dirxml(history);
+    });
+    errorBtns[4].addEventListener('click', () => {
+      console.group(['grou','-','ping']);
+    });
+    errorBtns[5].addEventListener('click', () => {
+      console.groupEnd();
+    });
+    errorBtns[6].addEventListener('click', () => {
+      console.table([["tabling"]]);
+    });
+    errorBtns[7].addEventListener('click', () => {
+      console.time('timing!');
+    });
+    errorBtns[8].addEventListener('click', () => {
+      console.timeEnd('timing!');
+    });
+    errorBtns[9].addEventListener('click', () => {
+      function trace(){
+        const doTrace = () => console.trace();
+        doTrace();
+      }
+      trace();
+    });
+
   </script>
 </body>
 </html>
